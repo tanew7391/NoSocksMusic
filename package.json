@@ -1,7 +1,7 @@
 {
-  "name": "No Socks Visualizer",
+  "name": "spotify-oauth",
   "version": "0.0.1",
-  "description": "Spotify Music Visualizer",
+  "description": "Easy authentication for Spotify",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
