@@ -1,0 +1,23 @@
+{
+  "name": "No Socks Visualizer",
+  "version": "0.0.1",
+  "description": "Spotify Music Visualizer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.15.2",
+    "spotify-web-api-node": "^2.3.6"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "spotify",
+    "express"
+  ]
+}
