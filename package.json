@@ -1,0 +1,23 @@
+{
+  "name": "spotify-info",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./server.js",
+    "ui": "browser-sync start --config bs-config.js",
+    "start": "concurrently \"npm run dev\" \"npm run ui\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^5.3.0",
+    "express": "^4.17.1",
+    "pug": "^3.0.0",
+    "spotify-web-api-node": "^5.0.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.13",
+    "nodemon": "^2.0.6"
+  }
+}
