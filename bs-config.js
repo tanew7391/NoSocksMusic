@@ -1,5 +1,7 @@
+const dotenv = require('dotenv');
+dotenv.config();
 module.exports = {
-    proxy: "localhost:8000",
+    proxy: `http://localhost:${process.env.PORT}`,
     files: ["**/*.css", "**/*.pug", "**/*.js"],
     ignore: ["node_modules"],
     reloadDelay: 10,

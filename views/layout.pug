@@ -12,10 +12,9 @@ html
   body
     block body-header
       include body-header
-    #root
-      block body-content
-        h1 Hey dingus!
-        h2 You forgot to add body content.
-    #foot
-      block body-header
-        include body-footer
+    block body-content
+      h1 Hey dingus!
+      h2 You forgot to add body content.
+    block body-header
+      include body-footer
+    block scripts
