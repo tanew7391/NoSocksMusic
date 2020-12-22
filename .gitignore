@@ -114,7 +114,6 @@ dist
 .vscode-test
 
 # End of https://www.toptal.com/developers/gitignore/api/node
-<<<<<<< HEAD
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -139,5 +138,3 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-=======
->>>>>>> 23d6d6647ea6fbda492fb25a0a985e31be896b23
