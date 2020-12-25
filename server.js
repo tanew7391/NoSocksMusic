@@ -6,7 +6,8 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.PORT || "8000";
-const scopeList = ["user-follow-modify", "user-follow-read"]
+const scopeList = ["user-library-read"]
+var isAutho = false;
 
 
 // init Spotify API wrapper
@@ -26,23 +27,46 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 app.get("/", (req, res) => {
-    if(!tokenExpirationEpoch){
+    if(!isAutho){
         res.render("authorize", { title: "Authorize" });
-    } else if(tokenExpirationEpoch > (new Date().getTime() / 1000)){
+    } else if(tokenExpirationEpoch < (new Date().getTime() / 1000)){
         spotifyApi.refreshAccessToken().then(spotifyApi.refreshAccessToken().then(
             function(data) {
               console.log('The access token has been refreshed!');
               // Save the access token so that it's used in future calls
               spotifyApi.setAccessToken(data.body['access_token']);
+              res.redirect('/');
             },
             function(err) {
               console.log('Could not refresh access token', err);
+              res.redirect('/');
             }
           ));
     } else {
         res.render("main-page");
     }
 });
+
+app.get('/userTracks', (req, res) => {
+    if(!isAutho){
+        res.redirect('/');
+        return;
+    }
+    spotifyApi.getMySavedTracks({
+        limit : 50,
+        offset: 0
+      })
+      .then(function(data) {
+        for(const item of data.body.items){
+            console.log(item.track.album);
+        }
+        res.render('main-page'); //TODO: change
+      },
+      function(err) {
+        console.log('Something went wrong!', err);
+        res.redirect('/');
+      });
+})
 
 app.get("/authorize", (req, res) => {
     var authorizeURL = spotifyApi.createAuthorizeURL(scopeList);
@@ -51,6 +75,8 @@ app.get("/authorize", (req, res) => {
     res.redirect(authorizeURL);
 });
 
+app.get('/hey', (req, res) => res.send('ho!'));
+
 // Exchange Authorization Code for an Access Token
 
 
@@ -58,8 +84,10 @@ app.get("/callback", (req, res) => {
     var authorizationCode = req.query.code;
     // Check folks haven't just gone direct to the callback URL
     if (!authorizationCode) {
+        isAutho = false;
         res.redirect('/');
     } else {
+        isAutho = true;
         res.render("callback", { title: "Callback" });
     }
 
@@ -75,6 +103,7 @@ app.get("/callback", (req, res) => {
         console.log('Something went wrong when retrieving the access token!', err.message);
     });
 });
+
 
 // listen for requests :)
 app.listen(port, () => {
