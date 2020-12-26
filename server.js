@@ -27,45 +27,62 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 app.get("/", (req, res) => {
-    if(!isAutho){
+    if (!isAutho) {
         res.render("authorize", { title: "Authorize" });
-    } else if(tokenExpirationEpoch < (new Date().getTime() / 1000)){
+    } else if (tokenExpirationEpoch < (new Date().getTime() / 1000)) {
         spotifyApi.refreshAccessToken().then(spotifyApi.refreshAccessToken().then(
-            function(data) {
-              console.log('The access token has been refreshed!');
-              // Save the access token so that it's used in future calls
-              spotifyApi.setAccessToken(data.body['access_token']);
-              res.redirect('/');
+            function (data) {
+                console.log('The access token has been refreshed!');
+                // Save the access token so that it's used in future calls
+                spotifyApi.setAccessToken(data.body['access_token']);
+                res.redirect('/');
             },
-            function(err) {
-              console.log('Could not refresh access token', err);
-              res.redirect('/');
+            function (err) {
+                console.log('Could not refresh access token', err);
+                res.redirect('/');
             }
-          ));
+        ));
     } else {
         res.render("main-page");
     }
 });
 
 app.get('/userTracks', (req, res) => {
-    if(!isAutho){
+    if (!isAutho) {
         res.redirect('/');
         return;
     }
+    var trackToAlbumDict = {};
+
     spotifyApi.getMySavedTracks({
-        limit : 50,
+        limit: 50,
         offset: 0
-      })
-      .then(function(data) {
-        for(const item of data.body.items){
-            console.log(item.track.album);
-        }
-        res.render('main-page'); //TODO: change
-      },
-      function(err) {
-        console.log('Something went wrong!', err);
-        res.redirect('/');
-      });
+    })
+        .then(function (data) {
+            for (const item of data.body.items) {
+                console.log(item.track.name);
+                console.log(item.track.album.id);
+                trackToAlbumDict[item.track.name] = item.track.album.id;
+            }
+        },
+            function (err) {
+                console.log('Something went wrong!', err);
+                res.redirect('/');
+            }).then(    console.log(trackToAlbumDict)          );
+            /*
+    for (var track in trackToAlbumDict) {
+        spotifyApi.getAlbums(trackToAlbumDict[track]).then(
+            function (data) {
+                console.log(data.body);
+            },
+            function (err) {
+                console.log('Something went wrong!', err);
+                res.redirect('/');
+            });
+            
+    }
+    */
+    res.render('main-page');
 })
 
 app.get("/authorize", (req, res) => {
