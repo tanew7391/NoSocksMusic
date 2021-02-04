@@ -6,7 +6,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.PORT || "8000";
-const scopeList = ["user-library-read"]
+const scopeList = ["user-library-read", "user-top-read"]
 var isAutho = false;
 
 
@@ -52,37 +52,25 @@ app.get('/userTracks', (req, res) => {
         res.redirect('/');
         return;
     }
-    var trackToAlbumDict = {};
+    var topTracks = [];
 
-    spotifyApi.getMySavedTracks({
+    spotifyApi.getMyTopTracks({
+        time_range: "long_term",
         limit: 50,
         offset: 0
     })
         .then(function (data) {
             for (const item of data.body.items) {
-                console.log(item.track.name);
-                console.log(item.track.album.id);
-                trackToAlbumDict[item.track.name] = item.track.album.id;
+                for(const photo of item.album.images){
+                    topTracks.push(photo.url);
+                }
             }
+            res.render('albumns', { images: topTracks });
         },
             function (err) {
                 console.log('Something went wrong!', err);
                 res.redirect('/');
-            }).then(    console.log(trackToAlbumDict)          );
-            /*
-    for (var track in trackToAlbumDict) {
-        spotifyApi.getAlbums(trackToAlbumDict[track]).then(
-            function (data) {
-                console.log(data.body);
-            },
-            function (err) {
-                console.log('Something went wrong!', err);
-                res.redirect('/');
             });
-            
-    }
-    */
-    res.render('main-page');
 })
 
 app.get("/authorize", (req, res) => {
