@@ -6,7 +6,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.PORT || "8000";
-const scopeList = ["user-library-read", "user-top-read"]
+const scopeList = ["user-library-read", "user-top-read", "playlist-read-private"];
 var isAutho = false;
 
 
@@ -48,11 +48,8 @@ app.get("/", (req, res) => {
 });
 
 app.get('/userTracks', (req, res) => {
-    if (!isAutho) {
-        res.redirect('/');
-        return;
-    }
-    var topTracks = [];
+    res.redirect('playlistList');
+    /* var topTracks = [];
 
     spotifyApi.getMyTopTracks({
         time_range: "long_term",
@@ -70,8 +67,61 @@ app.get('/userTracks', (req, res) => {
             function (err) {
                 console.log('Something went wrong!', err);
                 res.redirect('/');
-            });
-})
+            }); */
+});
+
+
+/**
+ * Get users playlists
+ */
+app.get("/playlistList", (req, res) => {
+    if (!isAutho) {
+        res.status(403).redirect('/');
+        return;
+    }
+    let playlists = [];
+    getAllPlaylists(0, playlists).then(() => res.json(playlists));
+});
+
+async function getAllPlaylists(offset, playlists){
+    let finished = false;
+    while(!finished) {
+        let data = await spotifyApi.getUserPlaylists({
+            limit: 50,
+            offset: offset
+        });
+        for(let i of data.body.items) //while data.body.next != null
+        {
+            playlists.push({name:i.name,id:i.id});
+        }
+        if(data.body.next == null)
+        {
+            finished = true;
+        }
+        offset += 50;
+    }
+    return;
+}
+
+app.get("/playlistInfo", (req, res) => {
+    if (!isAutho) {
+        res.status(403).redirect('/');
+        return;
+    }
+    if(!req.query.playlistID){
+        return res.sendStatus(400);
+    }
+    spotifyApi.getPlaylistTracks(req.query.playlistID).then((data) => {
+        for(let track of data.body.items)
+        {
+            console.log(track);
+        }
+    });
+    
+    res.sendStatus(200);
+});
+
+
 
 app.get("/authorize", (req, res) => {
     var authorizeURL = spotifyApi.createAuthorizeURL(scopeList);
